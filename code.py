@@ -5,7 +5,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-def mail_send(issues,you):
+class MailException(Exception):
+    def __init__(self, text):
+        self.txt = text
+
+def mail_send(issues, receiverMail):
     html = f"""
         <html>
         <head></head>
@@ -38,9 +42,11 @@ c = csv.reader(mails)
 for row in c:
     try:
         emps.append(row[0])
-        if row[0].split('@') != 'dengisrazy.ru' :
+        if row[0].split('@')[1] != 'dengisrazy.ru' :
             raise MailException('Почта некорректного формата')
-    
+    except Exception :
+        print()
+
 mails.close()
 now = date.today()
 date1 = date(now.year,now.month,(now.day-2))
@@ -53,7 +59,6 @@ for i in emps :
     inTwoDays = jira.search_issues('assignee = "'+i+'"and (status = "In Progress" or status = "To Do") and duedate = '+str(date1)+' order by created desc', fields=['summary'])
     inOneDay = jira.search_issues('assignee = "'+i+'"and (status = "In Progress" or status = "To Do") and duedate = '+str(date2)+' order by created desc', fields=['summary'])
     today = jira.search_issues('assignee = "'+i+'"and (status = "In Progress" or status = "To Do") and duedate = '+str(now)+' order by created desc', fields=['summary'])
-    receiverMail = i
 
 with open('samp1.txt', 'r') as f1:
     sendOneDay = f1.read()
